@@ -60,7 +60,6 @@ def select_admitted_file():
         admitted_file_label.tooltip_text = admitted_file_path
         messagebox.showinfo("Fichier chargé", "Fichier Excel des admis chargé avec succès.")
 
-
 # Charger les étudiants
 def load_student_data(file_path):
     df = pd.read_excel(file_path)
@@ -73,7 +72,7 @@ def load_student_data(file_path):
     if not num_col:
         num_col = "Inconnu"  # Valeur par défaut si aucune colonne n'est trouvée
 
-    # Nettoyer et normaliser les noms de colonnes
+     # Nettoyer et normaliser les noms de colonnes
     normalized_cols = [col.strip().lower() for col in df.columns]
 
     # Ajouter colonne NumInscription AVANT de restreindre les colonnes
@@ -89,12 +88,34 @@ def load_student_data(file_path):
     if full_name_col:
         # Si la colonne "Noms et Prénoms" existe, l'utiliser
         df['FullName'] = df[df.columns[normalized_cols.index(full_name_col)]].fillna('').astype(str).str.upper()
-    else:
-        raise ValueError("Colonne 'Nom et Prénom' ou similaire introuvable.")
+    elif 'nom' in normalized_cols and 'prénoms' in normalized_cols:
+        noms_col = df.columns[normalized_cols.index('nom')]
+        prenoms_col = df.columns[normalized_cols.index('prénoms')]
+        
+        df[noms_col] = df[noms_col].fillna('').astype(str).str.upper()
+        df[prenoms_col] = df[prenoms_col].fillna('').astype(str).str.upper()
+        
+        df['FullName'] = df.apply(
+            lambda row: f"{row[noms_col]} {row[prenoms_col]}".strip(), axis=1
+        )
+
+    elif 'noms' in normalized_cols and 'prénoms' in normalized_cols:
+        noms_col = df.columns[normalized_cols.index('noms')]
+        prenoms_col = df.columns[normalized_cols.index('prénoms')]
+        
+        df[noms_col] = df[noms_col].fillna('').astype(str).str.upper()
+        df[prenoms_col] = df[prenoms_col].fillna('').astype(str).str.upper()
+        
+        df['FullName'] = df.apply(
+            lambda row: f"{row[noms_col]} {row[prenoms_col]}".strip(), axis=1
+        )
+
+        
 
     student_set = set(df[['FullName', 'NumInscription']].itertuples(index=False, name=None))
 
     return student_set
+
 # Charger les admis avec ajout du numéro d'inscription
 def load_admitted_students(file_path):
     df = pd.read_excel(file_path)
@@ -210,7 +231,6 @@ def compare_students(mes_etudiants, admitted_students):
     )
 
     return df_resultat
-
 
 # Calcul pourcentage
 def calculate_success_percentage(df):
@@ -465,7 +485,7 @@ def hide_tooltip(event):
 # Interface utilisateur
 root = tk.Tk()
 root.title("T&Resultat")
-root.state('-zoomed')
+root.state("zoomed")
 
 screen_height = root.winfo_screenheight()
 treeview_height_pixels = int(screen_height * 0.6)

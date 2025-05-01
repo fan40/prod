@@ -10,11 +10,23 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import Image as RLImage
 from PIL import Image, ImageTk 
+import sys
 
 
 # Variables globales
 student_file_path = None
 admitted_file_path = None
+
+def resource_path(relative_path):
+    """ Récupère le chemin absolu du fichier de ressource (image, etc.) """
+    try:
+        # Si l'application est dans l'exécutable, PyInstaller crée un dossier temporaire
+        # où il extrait les fichiers.
+        base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+        return os.path.join(base_path, relative_path)
+    except Exception as e:
+        print(f"Erreur lors de la récupération du fichier : {e}")
+        return relative_path
 
 def normalize_name(name):
      # Supprimer les accents et mettre en majuscule
@@ -402,7 +414,7 @@ def save_admitted_to_pdf():
             styles = getSampleStyleSheet()
 
             # Ajouter le logo
-            logo_path = "logo/logo_cours.jpg"
+            logo_path = resource_path("logo/logo_cours.jpg")
             if os.path.exists(logo_path):
                 logo = RLImage(logo_path, width=3*cm, height=3*cm)
                 logo.hAlign = "LEFT"
@@ -543,7 +555,7 @@ admitted_table.configure(yscrollcommand=scrollbar.set)
 scrollbar.pack(side=tk.RIGHT, fill="y")
 
 # Charger le logo
-logo_path = "logo/app.png"  # Assure-toi que ce chemin est correct
+logo_path = resource_path("logo/app.png")  # Assure-toi que ce chemin est correct
 if os.path.exists(logo_path):
     logo_img = Image.open(logo_path)
     logo_img = logo_img.resize((100, 100))  # Redimensionne selon ton besoin

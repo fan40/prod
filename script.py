@@ -484,8 +484,8 @@ def hide_tooltip(event):
 
 # Interface utilisateur
 root = tk.Tk()
-root.title("T&Resultat")
-root.state("zoomed")
+root.title("Cours Prépa")
+root.state('zoomed')
 
 screen_height = root.winfo_screenheight()
 treeview_height_pixels = int(screen_height * 0.6)

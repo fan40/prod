@@ -13,6 +13,8 @@ from PIL import Image, ImageTk
 import sys
 from datetime import datetime
 import locale
+import subprocess
+import platform
 
 
 # Variables globales
@@ -565,7 +567,15 @@ def save_admitted_to_pdf():
             elements.append(table)
             doc.build(elements)
 
-            messagebox.showinfo("Succès", f"PDF enregistré avec succès à :\n{save_path}")
+            # Ouvrir automatiquement le PDF après sauvegarde
+            try:
+                if platform.system() == "Windows":
+                    os.startfile(save_path)
+                else: 
+                    subprocess.call(["xdg-open", save_path])
+            except Exception as open_err:
+                messagebox.showwarning("Ouverture échouée", f"Le PDF a été enregistré mais n'a pas pu être ouvert automatiquement.\n\nErreur : {open_err}")
+
 
     except Exception as e:
         messagebox.showerror("Erreur", f"Erreur lors de la sauvegarde PDF : {str(e)}")

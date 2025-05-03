@@ -11,6 +11,8 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import Image as RLImage
 from PIL import Image, ImageTk 
 import sys
+from datetime import datetime
+import locale
 
 
 # Variables globales
@@ -516,9 +518,124 @@ def save_admitted_to_pdf():
             logo_path = resource_path("logo/logo_cours.jpg")
             if os.path.exists(logo_path):
                 logo = RLImage(logo_path, width=3*cm, height=3*cm)
-                logo.hAlign = "LEFT"
+                logo.hAlign = "CENTER"
                 elements.append(logo)
+            
+            # Définir la locale en français pour afficher le mois en français
+            locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')
 
+            # Ajouter la date après le logo
+            date_str = "Antananarivo, le " + datetime.now().strftime("%d %B %Y")
+
+            # Style de la date
+            date_style = styles["Normal"]
+            date_style.fontName = "Helvetica"
+            date_style.fontSize = 10
+            date_style.alignment = 1  # Centré
+
+            # Créer le paragraphe avec la date
+            date = Paragraph(date_str, date_style)
+            elements.append(date)
+
+            # Ajouter un petit espacement après la date
+            elements.append(Spacer(1, 12))
+            # Ajouter le titre
+            title_style = styles["Normal"]
+            title_style.fontName = "Helvetica-Bold"
+            title = Paragraph("LISTE DE NOS CANDIDATS ADMIS AUX CONCOURS", title_style)
+            elements.append(title)
+            elements.append(Spacer(1, 12))
+
+            # Préparer les données du tableau
+            admitted_df = admitted_df[['NumInscription', 'FullName']].copy()
+            admitted_df.columns = ['NUMÉRO D\'INSCRIPTION', 'NOM ET PRÉNOMS']
+            data = [admitted_df.columns.tolist()] + admitted_df.values.tolist()
+
+            col_width = [6 * cm, 10 * cm]
+            table = Table(data, colWidths=col_width, repeatRows=1)
+            table.setStyle(TableStyle([
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                ("FONTSIZE", (0, 0), (-1, -1), 10),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                ("TOPPADDING", (0, 0), (-1, -1), 6),
+                ("GRID", (0, 0), (-1, -1), 0.25, colors.grey),
+            ]))
+
+            elements.append(table)
+            doc.build(elements)
+
+            messagebox.showinfo("Succès", f"PDF enregistré avec succès à :\n{save_path}")
+
+    except Exception as e:
+        messagebox.showerror("Erreur", f"Erreur lors de la sauvegarde PDF : {str(e)}")
+def save_admitted_to_pdf():
+    try:
+        if not student_file_path or not admitted_file_path:
+            messagebox.showwarning("Attention", "Veuillez d'abord traiter les fichiers.")
+            return
+
+        # Charger les données
+        students_df = load_student_data(student_file_path)
+        admitted_students = load_admitted_students(admitted_file_path)
+
+        # Comparer
+        students_df = compare_students(students_df, admitted_students)
+        admitted_df = students_df[students_df['Admis'] == True].copy()
+
+        # Trier les étudiants par ordre de mérite (ou d'apparition dans la liste des admis)
+        if admitted_df.empty:
+            messagebox.showinfo("Information", "Aucun étudiant admis à sauvegarder.")
+            return
+
+        admitted_df = admitted_df.sort_values("Order")
+
+        # Chemin de sauvegarde
+        save_path = filedialog.asksaveasfilename(
+            defaultextension=".pdf",
+            filetypes=[("Fichiers PDF", "*.pdf")],
+            title="Enregistrer sous..."
+        )
+
+        if save_path:
+            # Création du PDF
+            doc = SimpleDocTemplate(
+                save_path,
+                pagesize=A4,
+                topMargin=1*cm,
+                leftMargin=2*cm,
+                rightMargin=2*cm,
+                bottomMargin=2*cm
+            )
+
+            elements = []
+            styles = getSampleStyleSheet()
+
+            # Ajouter le logo
+            logo_path = resource_path("logo/logo_cours.jpg")
+            if os.path.exists(logo_path):
+                logo = RLImage(logo_path, width=3*cm, height=3*cm)
+                logo.hAlign = "CENTER"
+                elements.append(logo)
+            
+            # Définir la locale en français pour afficher le mois en français
+            locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')
+
+            # Ajouter la date après le logo
+            date_str = "Antananarivo, le " + datetime.now().strftime("%d %B %Y")
+
+            # Style de la date
+            date_style = styles["Normal"]
+            date_style.fontName = "Helvetica"
+            date_style.fontSize = 10
+            date_style.alignment = 1  # Centré
+
+            # Créer le paragraphe avec la date
+            date = Paragraph(date_str, date_style)
+            elements.append(date)
+
+            # Ajouter un petit espacement après la date
+            elements.append(Spacer(1, 12))
             # Ajouter le titre
             title_style = styles["Normal"]
             title_style.fontName = "Helvetica-Bold"

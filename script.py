@@ -672,7 +672,7 @@ def save_admitted_to_pdf():
             elements.append(table)
             doc.build(elements)
 
-            messagebox.showinfo("Succès", f"PDF enregistré avec succès à :\n{save_path}")
+            messagebox.showinfo(f"{save_path}", f"Résulat enregistré dans :\n{save_path}")
             # Ouvrir automatiquement le PDF après sauvegarde
             try:
                 if platform.system() == "Windows":

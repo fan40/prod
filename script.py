@@ -49,7 +49,7 @@ def select_student_file():
         filename = os.path.basename(student_file_path)
         student_file_label.config(text=f"Fichier Excel : {filename}")
         student_file_label.tooltip_text = student_file_path
-        messagebox.showinfo("Fichier chargé", "Fichier Excel chargé avec succès.")
+        messagebox.showinfo(f"{filename}", f"{filename} ajouté avec succès.")
 
 # Sélection admis
 def select_admitted_file():
@@ -62,7 +62,7 @@ def select_admitted_file():
         filename = os.path.basename(admitted_file_path)
         admitted_file_label.config(text=f"Fichier Excel : {filename}")
         admitted_file_label.tooltip_text = admitted_file_path
-        messagebox.showinfo("Fichier chargé", "Fichier Excel des admis chargé avec succès.")
+        messagebox.showinfo(f"{filename}", f"{filename} ajouté avec succès.")
 
 # Charger les étudiants
 def load_student_data(file_path):
